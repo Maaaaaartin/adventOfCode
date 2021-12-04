@@ -1,9 +1,7 @@
 import scala.io.Source
 
 object Day1 {
-  def parse[T](fileName:String, mapper:(String => T)):Seq[T] = {
-    Source.fromFile(s"src/main/resources/$fileName").getLines().map(mapper).toSeq
-  }
+ import FileParser._
 
   def main(args: Array[String]) = {
     val ints = parse("day1.txt", _.toInt)
@@ -14,17 +12,24 @@ object Day1 {
 
     println(sumOfIncreasingValues)
     println(sumOfIncreasingValuesSliding3)
+
+    println(sumList(ints.tail, ints.head, 0))
+    println(sumList(intsGroupedBy3Sliding.tail, intsGroupedBy3Sliding.head, 0))
   }
 
   def sumIncreasedFromPrevious(list:Seq[Int]): Int = {
-   list.foldLeft((0,Option.empty[Int]))(accIfPreviousIncreased)._1
+   list.tail.foldLeft((0,list.head))(accIfPreviousIncreased)._1
   }
 
-  def accIfPreviousIncreased( tup:(Int, Option[Int]), currInt:Int): (Int, Option[Int]) = {
-    val (acc, optInt) = tup
-    optInt match {
-      case Some(aInt) => if(currInt > aInt) (acc+1, Some(currInt)) else (acc, Some(currInt))
-      case _ => (acc, Some(currInt))
-    }
+  def accIfPreviousIncreased( tup:(Int, Int), currInt:Int): (Int, Int) = {
+    val (acc, oldInt) = tup
+    if(currInt > oldInt) (acc+1, currInt)
+    else (acc, currInt)
+  }
+
+  def sumList(list:Seq[Int], previous:Int, acc:Int):Int = {
+    if(list.isEmpty) acc
+    else if(list.head > previous) sumList(list.tail, list.head, acc+1)
+    else sumList(list.tail, list.head, acc)
   }
 }
